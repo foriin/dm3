@@ -1,12 +1,23 @@
 library(GenomicRanges)
 library(dplyr)
 
-load("genes.RData")
+# Variables and data
 
+load("genes.RData")
 
 all.chroms <-  c("2L", "2LHet", "2R", "2RHet", "3L", "3LHet",
                  "3R", "3RHet", "4", "X", "XHet", "YHet")
 euc.chroms <- c("2L", "2R", "3L", "3R", "X")
+euc.gr <- GRanges(
+  seqnames = Rle(c("2L", "2R", "3L", "3R", "X")),
+  ranges = IRanges(
+    start = c(1, 1600000, 1, 1, 1),
+    end = c(22000000, 21146700, 22900000, 27900000, 22422800)
+  )
+)
+
+# Functions
+
 bedTools.shuffle.jac <- function(bed.1, bed.2, shuf = F, opt.string="-chrom"){
 
   bed.file.1 <- tempfile()
