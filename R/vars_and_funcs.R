@@ -3,6 +3,22 @@ library(dplyr)
 
 # Variables and data
 
+# dm3.genes <- fread("~/IMG/data/dmel/gene_list/Drosophila_melanogaster.BDGP5.78.full.genes.gtf") %>%
+#   select(c(1, 4, 5, 7, 9)) %>%
+#   setNames(c("chr", "start", "end", "strand", "attr")) %>%
+#   mutate(FBgn = sub('.*gene_id "(FBgn[0-9]+)";.*', '\\1', attr), gene_id = sub('.*gene_name "([^;]+)";.*', '\\1', attr),
+#          TSS = ifelse(strand == "+", start, end)) %>%
+#   select(-attr)
+#
+# dm3.genes <- dm3.genes %>% mutate(chr = sub("chr", "", chr))
+# dm3.genes.gr <- makeGRangesFromDataFrame(dm3.genes, keep.extra.columns = T)
+# dm3.tss.gr <- makeGRangesFromDataFrame(dm3.genes %>% select(-start, -end),
+#                                        start.field = "tss",
+#                                        end.field = "tss",
+#                                        keep.extra.columns = T)
+# save(dm3.genes, dm3.genes.gr, dm3.tss.gr, file = "genes.RData")
+
+
 load("genes.RData")
 
 all.chroms <-  c("2L", "2LHet", "2R", "2RHet", "3L", "3LHet",
@@ -15,6 +31,22 @@ euc.gr <- GRanges(
     end = c(22000000, 21146700, 22900000, 27900000, 22422800)
   )
 )
+
+chr.lengths <- c(
+  23011544,
+  368872,
+  21146708,
+  3288761,
+  24543557,
+  2555491,
+  27905053,
+  2517507,
+  1351857,
+  22422827,
+  204112,
+  347038
+)
+names(chr.lengths) <- all.chroms
 
 # Functions
 
@@ -116,6 +148,31 @@ delete.het.gr <- function(data, r6 = FALSE){
 
   subsetByOverlaps(data, euc.coords)
 
+}
+
+add.chr <- function(obj, rev = F){
+  # Function to add or remove "chr" from chromosome names either in
+  # data frames with designated "chr" column (chr being a name of a column)
+  # or in GRanges objects
+  if (typeof(obj) == "list"){
+    if (rev) {
+      obj$chr <-  gsub("chr", "", obj$chr)
+      return(obj)
+    } else{
+      obj$chr <-  paste0("chr", obj$chr)
+      return(obj)
+    }
+  } else if (typeof(obj) == "S4"){
+    if (rev){
+      seqlevels(obj) <-  gsub("chr", "", seqlevels(obj))
+      return(obj)
+    } else {
+      seqlevels(obj) <- paste0("chr", seqlevels(obj))
+      return(obj)
+    }
+  } else {
+    stop("Wrong type of object. Must be either data frame or GRanges object")
+  }
 }
 
 
